@@ -2,6 +2,7 @@
 
     chdir(dirname(__FILE__));
         
+    require_once "../include/constants.php";
     require_once "../config/coinspark_config.php";
     require_once "../include/signature.php";
     require_once "../include/log.php";
@@ -80,7 +81,7 @@
                 break;
             case 'GET':
                 $decoded=array();
-                $decoded['method']='test';
+                $decoded['method']='info';
                 $decoded['error_mode']='none';
                 $decoded['id']=0;
                 $decoded['params']=array();
@@ -229,6 +230,10 @@
             case 'test':                
                 require_once "../include/test.php";
                 $response['result']=  make_test($decoded['error_mode']);
+                $json_output=false;
+                break;
+            case 'info':                
+                $response['result']=array('Status' => 'OK');
                 $json_output=false;
                 break;
             default:
