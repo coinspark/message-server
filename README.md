@@ -58,7 +58,7 @@ Requirements for the asset server are as follows:
 
     sudo apt-get update
     sudo apt-get install build-essential
-    sudo apt-get install mysql-server mysql apache2 php5
+    sudo apt-get install mysql-server mysql apache2 php5 php-mysql 
     sudo apt-get install libssl-dev 
 
     /etc/init.d/apache2 restart
@@ -79,7 +79,7 @@ Requirements for the asset server are as follows:
 # Package installation:
 
     yum groupinstall "Development tools"
-    yum install mysql-server mysql httpd php
+    yum install mysql-server mysql httpd php php-mysql 
     yum install wget
 
     cd /usr/src
