@@ -50,7 +50,7 @@
             {
                 return $error;
             }
-            if (($error = $this->acceptSeed()) !== true)
+            if (($error = $this->acceptSalt()) !== true)
             {
                 return $error;
             }
@@ -88,7 +88,7 @@
             {
                 return $error;
             }
-            if (($error = $this->acceptSeed()) !== true)
+            if (($error = $this->acceptSalt()) !== true)
             {
                 return $error;
             }
@@ -572,35 +572,35 @@
             return true;
         }        
         
-        private function acceptSeed()
+        private function acceptSalt()
         {
-            if(!isset($this->params['seed']))
+            if(!isset($this->params['salt']))
             {
-                log_string(log_level_filter,"","FILTER: seed - not set");
-                return array_to_object(array('code'=>COINSPARK_ERR_INVALID_PARAMS,'message'=>"The seed parameter is required"));                
+                log_string(log_level_filter,"","FILTER: salt - not set");
+                return array_to_object(array('code'=>COINSPARK_ERR_INVALID_PARAMS,'message'=>"The salt parameter is required"));                
             }
             
-            $seed=base64_decode(trim($this->params['seed']), true);
-            if($seed === false)
+            $salt=base64_decode(trim($this->params['salt']), true);
+            if($salt === false)
             {
-                log_string(log_level_filter,"","FILTER: seed - not base64: ".$this->params['seed']);
-                return array_to_object(array('code'=>COINSPARK_ERR_INVALID_PARAMS,'message'=>"The seed parameter is not base64 encoded string"));                
+                log_string(log_level_filter,"","FILTER: salt - not base64: ".$this->params['salt']);
+                return array_to_object(array('code'=>COINSPARK_ERR_INVALID_PARAMS,'message'=>"The salt parameter is not base64 encoded string"));                
             }
             
-            if(strlen($seed)<COINSPARK_CREATE_SEED_MIN_BYTES)
+            if(strlen($salt)<COINSPARK_CREATE_SALT_MIN_BYTES)
             {
-                log_string(log_level_reject,"","FILTER: seed - too short: ".strlen($seed));
-                return array_to_object(array('code'=>COINSPARK_ERR_SEED_NOT_ACCEPTABLE,'message'=>"The seed parameter is not acceptable, e.g. because it is the empty string or is too short to provide sufficient security."));                                
+                log_string(log_level_reject,"","FILTER: salt - too short: ".strlen($salt));
+                return array_to_object(array('code'=>COINSPARK_ERR_SALT_NOT_ACCEPTABLE,'message'=>"The salt parameter is not acceptable, e.g. because it is the empty string or is too short to provide sufficient security."));                                
             }
             
-            if(strlen($seed)>COINSPARK_CREATE_SEED_MAX_BYTES)
+            if(strlen($salt)>COINSPARK_CREATE_SALT_MAX_BYTES)
             {
-                log_string(log_level_reject,"","FILTER: seed - too long: ".strlen($seed));
-                return array_to_object(array('code'=>COINSPARK_ERR_SEED_NOT_ACCEPTABLE,'message'=>"The seed parameter is too long."));                                
+                log_string(log_level_reject,"","FILTER: salt - too long: ".strlen($salt));
+                return array_to_object(array('code'=>COINSPARK_ERR_SALT_NOT_ACCEPTABLE,'message'=>"The salt parameter is too long."));                                
             }
             
-            $this->filtered['seed']=$seed;
-            $this->filtered['seed_encoded']=trim($this->params['seed']);
+            $this->filtered['salt']=$salt;
+            $this->filtered['salt_encoded']=trim($this->params['salt']);
             return true;
         }
         

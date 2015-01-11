@@ -30,8 +30,8 @@
 
     define('COINSPARK_CREATE_KEEPSECONDS_MAX', 86400);                          // maximum number of seconds message can be stored
 
-    define('COINSPARK_CREATE_SEED_MIN_BYTES', 8);                               // minimal size of the seed string (binary)
-    define('COINSPARK_CREATE_SEED_MAX_BYTES',48);                               // maximal size of the seed string (binary)
+    define('COINSPARK_CREATE_SALT_MIN_BYTES', 8);                               // minimal size of the salt string (binary)
+    define('COINSPARK_CREATE_SALT_MAX_BYTES',48);                               // maximal size of the salt string (binary)
 
     define('COINSPARK_CREATE_MAX_PARTS', 16);                                   // maximum number of content parts allowed
     define('COINSPARK_CREATE_MIMETYPE_MAX_BYTES',64);                           // maximal size of the mimetype

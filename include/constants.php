@@ -28,7 +28,7 @@
     
     define("COINSPARK_ERR_DURATION_NOT_ACCEPTABLE",                    -11030);
     
-    define("COINSPARK_ERR_SEED_NOT_ACCEPTABLE",                        -11040);
+    define("COINSPARK_ERR_SALT_NOT_ACCEPTABLE",                        -11040);
     
     define("COINSPARK_ERR_TOO_MANY_MESSAGE_PARTS",                     -11050);
     define("COINSPARK_ERR_TOTAL_MESSAGE_TOO_LARGE",                    -11051);

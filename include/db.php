@@ -92,9 +92,9 @@
         
         $transaction=array();
         
-        $transaction[]="INSERT INTO transactions (TxID,MessageSeed,MessageHash,MessageSize,Sender,SenderIP,LifeTime,Created,Expired,PublicFlags,CountAddresses,CountContentParts) VALUES (".
+        $transaction[]="INSERT INTO transactions (TxID,MessageSalt,MessageHash,MessageSize,Sender,SenderIP,LifeTime,Created,Expired,PublicFlags,CountAddresses,CountContentParts) VALUES (".
             escape_value_for_sql($message['TxID']).",".
-            escape_value_for_sql($message['MessageSeed']).",".
+            escape_value_for_sql($message['MessageSalt']).",".
             escape_value_for_sql($message['MessageHash']).",".
             $message['MessageSize'].",".
             escape_value_for_sql($message['Sender']).",".
@@ -165,7 +165,7 @@
         if(is_array($row_array))
         {
             $row_array=array_change_key_case($row_array);
-            $message['MessageSeed']=$row_array[strtolower('MessageSeed')];
+            $message['MessageSalt']=$row_array[strtolower('MessageSalt')];
             $message['MessageHash']=$row_array[strtolower('MessageHash')];
             $message['MessageSize']=$row_array[strtolower('MessageSize')];
             $message['Sender']=$row_array[strtolower('Sender')];

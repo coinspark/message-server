@@ -6,7 +6,8 @@
     require_once '../include/log.php'; 
     require_once '../include/signature.php'; 
     
-    define('CONST_TEST_SERVER_URL', '127.0.0.1');                       
+//    define('CONST_TEST_SERVER_URL', '127.0.0.1');                       
+    define('CONST_TEST_SERVER_URL', 'msg3.coinspark.org');                       
     define('CONST_TEST_KEY_DIR', '/home/coinspark/.coinspark/messages/test/key');                          
     define('CONST_TEST_LOG_DIR', '/home/coinspark/.coinspark/messages/test/log');                          
     define('CONST_TEST_TMP_DIR', '/home/coinspark/.coinspark/messages/test/tmp');                          
@@ -217,14 +218,14 @@
             );
         }
         $message['keepseconds']=rand(1,COINSPARK_CREATE_KEEPSECONDS_MAX);
-        $message['seed_size']=rand(COINSPARK_CREATE_SEED_MIN_BYTES,COINSPARK_CREATE_SEED_MAX_BYTES);
+        $message['salt_size']=rand(COINSPARK_CREATE_SALT_MIN_BYTES,COINSPARK_CREATE_SALT_MAX_BYTES);
         
         $str="";        
-        for($i=0;$i<$message['seed_size'];$i++)
+        for($i=0;$i<$message['salt_size'];$i++)
         {
             $str.=chr(rand(0,255));
         }
-        $message['seed']=  base64_encode($str);
+        $message['salt']=  base64_encode($str);
         
         $message['num_content_parts']=rand(1,COINSPARK_CREATE_MAX_PARTS);
         
@@ -285,7 +286,7 @@
             }
         }
         $request->params->keepseconds=$message['keepseconds'];
-        $request->params->seed=$message['seed'];
+        $request->params->salt=$message['salt'];
         $request->params->message=array();
         
         foreach($message['content_parts'] as $content_part)
@@ -381,17 +382,17 @@
                 case "keepseconds too large":
                     $request->params->keepseconds=COINSPARK_CREATE_KEEPSECONDS_MAX+1;
                     break;
-                case "seed not set":
-                    unset($request->params->seed);
+                case "salt not set":
+                    unset($request->params->salt);
                     break;
-                case "seed not base64":
-                    $request->params->seed.="$";
+                case "salt not base64":
+                    $request->params->salt.="$";
                     break;
-                case "seed too short":
-                    $request->params->seed=base64_encode(substr(base64_decode($request->params->seed),0,COINSPARK_CREATE_SEED_MIN_BYTES-1));
+                case "salt too short":
+                    $request->params->salt=base64_encode(substr(base64_decode($request->params->salt),0,COINSPARK_CREATE_SALT_MIN_BYTES-1));
                     break;
-                case "seed too long":
-                    $request->params->seed=base64_encode(base64_decode($request->params->seed).str_repeat("A", COINSPARK_CREATE_SEED_MAX_BYTES));
+                case "salt too long":
+                    $request->params->salt=base64_encode(base64_decode($request->params->salt).str_repeat("A", COINSPARK_CREATE_SALT_MAX_BYTES));
                     break;
                 case "message not set":
                     unset($request->params->message);
@@ -464,7 +465,7 @@
             }
         }
         $request->params->keepseconds=$message['keepseconds'];
-        $request->params->seed=$message['seed'];
+        $request->params->salt=$message['salt'];
         $request->params->message=array();
         
         foreach($message['content_parts'] as $content_part)
@@ -718,9 +719,9 @@
     
     function check_message($message,$result,$sizes_only=false)
     {
-        if($message['seed'] != $result->seed)
+        if($message['salt'] != $result->salt)
         {
-            output_string("Seed mismatch");
+            output_string("Salt mismatch");
             return false;
         }
         if(count($message['content_parts']) != count($result->message))
@@ -823,10 +824,10 @@
             array("t"=>"b","n"=>"keepseconds not numeric"         ,"r"=>"pre_create"  ,"c"=>COINSPARK_ERR_INVALID_PARAMS),
             array("t"=>"b","n"=>"keepseconds negative"            ,"r"=>"pre_create"  ,"c"=>COINSPARK_ERR_DURATION_NOT_ACCEPTABLE),
             array("t"=>"b","n"=>"keepseconds too large"           ,"r"=>"pre_create"  ,"c"=>COINSPARK_ERR_DURATION_NOT_ACCEPTABLE),
-            array("t"=>"b","n"=>"seed not set"                    ,"r"=>"pre_create"  ,"c"=>COINSPARK_ERR_INVALID_PARAMS),
-            array("t"=>"b","n"=>"seed not base64"                 ,"r"=>"pre_create"  ,"c"=>COINSPARK_ERR_INVALID_PARAMS),
-            array("t"=>"b","n"=>"seed too short"                  ,"r"=>"pre_create"  ,"c"=>COINSPARK_ERR_SEED_NOT_ACCEPTABLE),
-            array("t"=>"b","n"=>"seed too long"                   ,"r"=>"pre_create"  ,"c"=>COINSPARK_ERR_SEED_NOT_ACCEPTABLE),
+            array("t"=>"b","n"=>"salt not set"                    ,"r"=>"pre_create"  ,"c"=>COINSPARK_ERR_INVALID_PARAMS),
+            array("t"=>"b","n"=>"salt not base64"                 ,"r"=>"pre_create"  ,"c"=>COINSPARK_ERR_INVALID_PARAMS),
+            array("t"=>"b","n"=>"salt too short"                  ,"r"=>"pre_create"  ,"c"=>COINSPARK_ERR_SALT_NOT_ACCEPTABLE),
+            array("t"=>"b","n"=>"salt too long"                   ,"r"=>"pre_create"  ,"c"=>COINSPARK_ERR_SALT_NOT_ACCEPTABLE),
             array("t"=>"b","n"=>"message not set"                 ,"r"=>"pre_create"  ,"c"=>COINSPARK_ERR_INVALID_PARAMS),
             array("t"=>"b","n"=>"too many message parts"          ,"r"=>"pre_create"  ,"c"=>COINSPARK_ERR_TOO_MANY_MESSAGE_PARTS),
             array("t"=>"b","n"=>"mime not set"                    ,"r"=>"pre_create"  ,"c"=>COINSPARK_ERR_INVALID_PARAMS),

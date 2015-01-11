@@ -31,7 +31,7 @@
         $time_now=time();
         $message=array(
             'TxID'          => $params['txid'],
-            'MessageSeed'   => $params['seed_encoded'],
+            'MessageSalt'   => $params['salt_encoded'],
             'MessageSize'   => $params['total_size'],
             'MessageHash'   => "",
             'Sender'        => $params['sender'],
@@ -146,7 +146,7 @@
         
         
         $result=array(
-            'seed'      => $message['MessageSeed'],
+            'salt'      => $message['MessageSalt'],
             'message'   => array(),
         );
         

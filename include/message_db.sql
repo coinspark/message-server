@@ -7,7 +7,7 @@ USE coinspark_messages;
 
 CREATE TABLE IF NOT EXISTS transactions(
     TxID                    VARCHAR(64) NOT NULL,
-    MessageSeed             VARCHAR(64) NOT NULL,
+    MessageSalt             VARCHAR(64) NOT NULL,
     MessageHash             VARCHAR(64) NOT NULL,
     MessageSize             INT(11) NOT NULL,
     Sender                  VARCHAR(64) NOT NULL,
