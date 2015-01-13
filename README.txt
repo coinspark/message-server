@@ -80,14 +80,19 @@ Requirements for the asset server are as follows:
 2.1.1 Ubuntu
 --------------------------------------------------
 
+# Ensure you are running as the root user:
+
+	su
+
 # Package installation:
 	
-	su
     apt-get update
     apt-get install build-essential
     apt-get install mysql-server mysql-client apache2 php5 php5-mysql php5-curl git-core
     apt-get install libssl-dev 
 
+# Setting up Apache and MySQL:
+	
     service apache2 restart
     service mysql restart
     /usr/bin/mysql_secure_installation
@@ -103,6 +108,8 @@ Requirements for the asset server are as follows:
 2.1.2 CentOS
 --------------------------------------------------
 
+# Ensure you are running as the root user:
+
     su
 
 # Package installation:
@@ -112,18 +119,19 @@ Requirements for the asset server are as follows:
     yum install wget
 
     cd /usr/src
-    wget http://www.openssl.org/source/openssl-1.0.1g.tar.gz
-    tar -zxf openssl-1.0.1g.tar.gz
-    cd openssl-1.0.1g
+    wget http://www.openssl.org/source/openssl-1.0.1k.tar.gz
+    tar -zxf openssl-1.0.1k.tar.gz
+    cd openssl-1.0.1k
     ./config --prefix=/usr --openssldir=/usr/local/openssl shared
     make
     make test
     make install
-    cd /usr/src
-    rm -rf openssl-1.0.1g.tar.gz
-    rm -rf openssl-1.0.1g
+    cd ..
+    rm -rf openssl-1.0.1k openssl-1.0.1k.tar.gz
 
-    service mysqld start	
+# Setting up Apache and MySQL:
+	
+    service mysqld start
     /usr/bin/mysql_secure_installation
     chkconfig mysqld on
 
