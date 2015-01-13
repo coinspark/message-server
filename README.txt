@@ -183,9 +183,6 @@ Requirements for the asset server are as follows:
     
     ln -s ~coinspark/message-server/public/index.php /var/www/html/index.php 
 
-# for Centos
-    service httpd restart
-
 
 2.3 Configuring the message server
 ==================================================
@@ -193,6 +190,10 @@ Requirements for the asset server are as follows:
 # Coinspark message delivery server configuration file can be found at 
 
     ~coinspark/message-server/config/coinspark_config.php
+
+# To change the password used by PHP to access the database in MySQL, set the new
+  password for user 'coinspark_user' in MySQL using SET PASSWORD, then modify the
+  CONST_MYSQL_MESSAGE_DB_PASS constant in coinspark_config.php file accordingly.
 
 
 2.4 Test the message server is responding
