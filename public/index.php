@@ -233,7 +233,7 @@
                 $json_output=false;
                 break;
             case 'info':                
-                $response['result']=array('Status' => 'OK');
+                $response['result']=array('CoinSpark Message Delivery Server Status' => 'OK');
                 $json_output=false;
                 break;
             default:
