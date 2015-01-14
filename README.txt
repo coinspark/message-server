@@ -1,21 +1,21 @@
 # CoinSpark message delivery server v1.0 beta 1
-# 
+#
 # Copyright (c) 2015 Coin Sciences Ltd - coinspark.org
-# 
-# Distributed under the AGPLv3 software license, see the accompanying 
+#
+# Distributed under the AGPLv3 software license, see the accompanying
 # file COPYING or http://www.gnu.org/licenses/agpl-3.0.txt
 
 
 ABOUT THE COINSPARK MESSAGE DELIVERY SERVER
 ==================================================
 
-CoinSpark messages allow bitcoin transactions to be enriched with additional 
-content, such as an explanatory note, contracts, invoices, or even multimedia 
-content such as images or videos. The message is transmitted from the sender 
-to recipient(s) via a message delivery server, while the message’s presence is 
-denoted by some message metadata added to the bitcoin transaction in an 
-OP_RETURN output. This metadata contains the address of the delivery server, 
-a list of output indexes for which the message is intended, and a hash of 
+CoinSpark messages allow bitcoin transactions to be enriched with additional
+content, such as an explanatory note, contracts, invoices, or even multimedia
+content such as images or videos. The message is transmitted from the sender
+to recipient(s) via a message delivery server, while the message’s presence is
+denoted by some message metadata added to the bitcoin transaction in an
+OP_RETURN output. This metadata contains the address of the delivery server,
+a list of output indexes for which the message is intended, and a hash of
 the full message content.
 
 
@@ -58,7 +58,7 @@ CONTENTS
         2.1.2 CentOS
     2.2 Installing message-server
     2.3 Configuring message-server
-3. Changelog    
+3. Changelog
 
 1. System requirements
 ==================================================
@@ -71,7 +71,7 @@ Requirements for the asset server are as follows:
  - At least 1 GB of RAM.
 
  - PHP 5 running under a regular web server such as Apache.
- 
+
  - MySQL 5.
 
 
@@ -93,13 +93,7 @@ Requirements for the asset server are as follows:
     apt-get update
     apt-get install build-essential
     apt-get install mysql-server mysql-client apache2 php5 php5-mysql php5-curl git-core
-    apt-get install libssl-dev 
-
-# Setting up Apache and MySQL:
-	
-    service apache2 restart
-    service mysql restart
-    /usr/bin/mysql_secure_installation
+    apt-get install libssl-dev
 
 # Adding coinspark user:
 
@@ -107,8 +101,13 @@ Requirements for the asset server are as follows:
     usermod -a -G www-data coinspark
     usermod -a -G coinspark www-data
     chmod 775 /home/coinspark
+
+# Setting up Apache and MySQL:
+	
     service apache2 restart
-    
+    service mysql restart
+    /usr/bin/mysql_secure_installation
+
 
 2.1.2 CentOS
 --------------------------------------------------
@@ -120,7 +119,7 @@ Requirements for the asset server are as follows:
 # Package installation:
 
     yum groupinstall "Development tools"
-    yum install mysql-server mysql httpd php php-mysql 
+    yum install mysql-server mysql httpd php php-mysql
     yum install wget
 
     cd /usr/src
@@ -154,13 +153,14 @@ Requirements for the asset server are as follows:
 
     service httpd restart
 
+
 2.2 Installing the message server
 ==================================================
 
     su coinspark
 
     cd
-    
+
     git clone https://github.com/coinspark/message-server message-server
 
     mysql -u root -p < message-server/include/message_db.sql
@@ -179,21 +179,21 @@ Requirements for the asset server are as follows:
 # for Ubuntu 12.04 and below:
 
     mv /var/www/index.html /var/www/index-original.html
-    ln -s ~coinspark/message-server/public/index.php /var/www/index.php 
+    ln -s ~coinspark/message-server/public/index.php /var/www/index.php
 
 # for other distributions:
 
     mv /var/www/html/index.html /var/www/html/index-original.html
-    
+
     	[don't worry if you get an error message here]
-    
-    ln -s ~coinspark/message-server/public/index.php /var/www/html/index.php 
+
+    ln -s ~coinspark/message-server/public/index.php /var/www/html/index.php
 
 
 2.3 Configuring the message server
 ==================================================
 
-# Coinspark message delivery server configuration file can be found at 
+# Coinspark message delivery server configuration file can be found at
 
     ~coinspark/message-server/config/coinspark_config.php
 
@@ -202,16 +202,24 @@ Requirements for the asset server are as follows:
   CONST_MYSQL_MESSAGE_DB_PASS constant in coinspark_config.php file accordingly.
 
 
-2.4 Test the message server is responding
+2.4 Test the message server
 ==================================================
 
 # Open your chosen URL in your web browser. You should see:
 
     CoinSpark Message Delivery Server Status: OK
+    
+# Run the battery of internal tests to check it's all working:
+
+	php /home/coinspark/message-server/public/index.php test random_pid
+	
+# If you see this line at the end, tests were completely successfully:
+	
+	---- Test completed ----
 
 
 3. CHANGELOG
 =====================================================================
 
-v1.0 beta 1 - 13 January 2015
+v1.0 beta 1 - 14 January 2015
 * First release
