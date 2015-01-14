@@ -86,10 +86,10 @@ Requirements for the asset server are as follows:
 
 # Ensure you are running as the root user:
 
-	su
+    su
 
 # Package installation:
-	
+
     apt-get update
     apt-get install build-essential
     apt-get install mysql-server mysql-client apache2 php5 php5-mysql php5-curl git-core
@@ -103,7 +103,7 @@ Requirements for the asset server are as follows:
     chmod 775 /home/coinspark
 
 # Setting up Apache and MySQL:
-	
+
     service apache2 restart
     service mysql restart
     /usr/bin/mysql_secure_installation
@@ -134,7 +134,7 @@ Requirements for the asset server are as follows:
     rm -rf openssl-1.0.1k openssl-1.0.1k.tar.gz
 
 # Setting up Apache and MySQL:
-	
+
     service mysqld start
     /usr/bin/mysql_secure_installation
     chkconfig mysqld on
@@ -185,7 +185,7 @@ Requirements for the asset server are as follows:
 
     mv /var/www/html/index.html /var/www/html/index-original.html
 
-    	[don't worry if you get an error message here]
+        [don't worry if you get an error message here]
 
     ln -s ~coinspark/message-server/public/index.php /var/www/html/index.php
 
@@ -211,11 +211,11 @@ Requirements for the asset server are as follows:
     
 # Run the battery of internal tests to check it's all working:
 
-	php /home/coinspark/message-server/public/index.php test random_pid
-	
+    php /home/coinspark/message-server/public/index.php test random_pid
+
 # If you see this line at the end, tests were completely successfully:
-	
-	---- Test completed ----
+
+    ---- Test completed ----
 
 
 3. CHANGELOG
