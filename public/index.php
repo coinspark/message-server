@@ -232,8 +232,8 @@
                 $response['result']=  make_test($decoded['error_mode']);
                 $json_output=false;
                 break;
-            case 'info':                
-                $response['result']=array('CoinSpark Message Delivery Server Status' => 'OK');
+            case 'info':                          
+                $response['result']=array('CoinSpark Message Delivery Server Status' => ($db == null) ? "Cannot connect to MySQL database" : "OK");
                 $json_output=false;
                 break;
             default:

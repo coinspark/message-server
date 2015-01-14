@@ -6,8 +6,7 @@
     require_once '../include/log.php'; 
     require_once '../include/signature.php'; 
     
-//    define('CONST_TEST_SERVER_URL', '127.0.0.1');                       
-    define('CONST_TEST_SERVER_URL', 'msg3.coinspark.org');                       
+    define('CONST_TEST_SERVER_URL', '127.0.0.1');                       
     define('CONST_TEST_KEY_DIR', '/home/coinspark/.coinspark/messages/test/key');                          
     define('CONST_TEST_LOG_DIR', '/home/coinspark/.coinspark/messages/test/log');                          
     define('CONST_TEST_TMP_DIR', '/home/coinspark/.coinspark/messages/test/tmp');                          
