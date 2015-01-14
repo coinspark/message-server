@@ -72,7 +72,7 @@ Requirements for the asset server are as follows:
 
  - PHP 5 running under a regular web server such as Apache.
 
- - MySQL 5.
+ - MySQL 5 or later, or MariaDB.
 
 
 2. Installing and configuring message server
