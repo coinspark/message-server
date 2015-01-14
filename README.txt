@@ -103,6 +103,7 @@ Requirements for the asset server are as follows:
     usermod -a -G www-data coinspark
     usermod -a -G coinspark www-data
     chmod 775 /home/coinspark
+    service apache2 restart
     
 
 2.1.2 CentOS
@@ -147,6 +148,7 @@ Requirements for the asset server are as follows:
     usermod -a -G coinspark apache
     chmod 775 /home/coinspark
 
+    service httpd restart
 
 2.2 Installing the message server
 ==================================================
