@@ -30,10 +30,12 @@ OP_RETURN metadata per bitcoin transaction, and the URL must be embedded within.
 The recommended solution is as follows:
 
 * Create a new short domain name, e.g. msg.example.com, for your delivery server
+
 * Host it at the root of that domain's website or inside a /coinspark/ directory,
   e.g. http(s)://msg.example.com/ or http(s)://msg.example.com/coinspark/
-* If you are hosting multiple sites on one server, ensure the CoinSpark directory is
-  the default for requests made to its IPv4 address, so that it can also be accessed,
+
+* If you are hosting multiple sites on one server, ensure that this is the default
+  for requests made to the server's IPv4 address, so that it can also be accessed,
   for example, via http(s)://12.34.56.78/ or http(s)://12.34.56.78/coinspark/
 
 This enables the address of your delivery server to take just a few bytes inside the
@@ -42,7 +44,8 @@ metadata. If the recommended solution is not possible, the following are permitt
 http(s)://msg.example.com/[directory]/
 http(s)://msg.example.com/coinspark/[directory]/
 
-The [directory] can contain the lowercase characters a-z, 0-9, - and . only.
+The [directory] can contain the lowercase characters a-z, 0-9, - and . only and
+should be as short as possible.
 
 
 CONTENTS
@@ -62,9 +65,10 @@ CONTENTS
 
 Requirements for the asset server are as follows:
 
- - Linux operating system such as CentOS, Ubuntu or Fedora. These instructions have been tested on Ubuntu x64 10.04, 12.04, 14.04 and CentOS x64 6.4, 6.5.
+ - Linux operating system such as CentOS, Ubuntu or Fedora. These instructions have
+   been tested on Ubuntu x64 10.04, 12.04, 14.04 and CentOS x64 6.4, 6.5.
 
- - At least 2 GB of RAM.
+ - At least 1 GB of RAM.
 
  - PHP 5 running under a regular web server such as Apache.
  
