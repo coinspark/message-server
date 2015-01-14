@@ -233,7 +233,7 @@
                 $json_output=false;
                 break;
             case 'info':                          
-                $response['result']=array('Status' => ($db == null) ? "Cannot connect to MySQL database" : "OK");
+                $response['result']=array('CoinSpark Message Delivery Server Status' => ($db == null) ? "Cannot connect to MySQL database" : "OK");
                 $json_output=false;
                 break;
             default:

@@ -1,14 +1,12 @@
-#
 # CoinSpark message delivery server v1.0 beta 1
 # 
 # Copyright (c) 2015 Coin Sciences Ltd - coinspark.org
 # 
 # Distributed under the AGPLv3 software license, see the accompanying 
 # file COPYING or http://www.gnu.org/licenses/agpl-3.0.txt
-#
 
 
-GENERAL INFORMATION
+ABOUT THE COINSPARK MESSAGE DELIVERY SERVER
 ==================================================
 
 CoinSpark messages allow bitcoin transactions to be enriched with additional 
@@ -19,6 +17,33 @@ denoted by some message metadata added to the bitcoin transaction in an
 OP_RETURN output. This metadata contains the address of the delivery server, 
 a list of output indexes for which the message is intended, and a hash of 
 the full message content.
+
+
+CHOOSING A DOMAIN NAME AND/OR IP ADDRESS
+==================================================
+
+The URL of your message delivery server needs to be embedded inside CoinSpark
+message metadata, and this leads to recommendations and restrictions. These are due
+to the fact that, as of version 0.9.x, the bitcoin network allows only 40 bytes of
+OP_RETURN metadata per bitcoin transaction, and the URL must be embedded within.
+
+The recommended solution is as follows:
+
+* Create a new short domain name, e.g. msg.example.com, for your delivery server
+* Host it at the root of that domain's website or inside a /coinspark/ directory,
+  e.g. http(s)://msg.example.com/ or http(s)://msg.example.com/coinspark/
+* If you are hosting multiple sites on one server, ensure the CoinSpark directory is
+  the default for requests made to its IPv4 address, so that it can also be accessed,
+  for example, via http(s)://12.34.56.78/ or http(s)://12.34.56.78/coinspark/
+
+This enables the address of your delivery server to take just a few bytes inside the
+metadata. If the recommended solution is not possible, the following are permitted:
+
+http(s)://msg.example.com/[directory]/
+http(s)://msg.example.com/coinspark/[directory]/
+
+The [directory] can contain the lowercase characters a-z, 0-9, - and . only.
+
 
 CONTENTS
 ==================================================
@@ -42,6 +67,8 @@ Requirements for the asset server are as follows:
  - At least 2 GB of RAM.
 
  - PHP 5 running under a regular web server such as Apache.
+ 
+ - MySQL 5.
 
 
 2. Installing and configuring message server
@@ -53,28 +80,35 @@ Requirements for the asset server are as follows:
 2.1.1 Ubuntu
 --------------------------------------------------
 
+# Ensure you are running as the root user:
+
+	su
+
 # Package installation:
+	
+    apt-get update
+    apt-get install build-essential
+    apt-get install mysql-server mysql-client apache2 php5 php5-mysql php5-curl git-core
+    apt-get install libssl-dev 
 
-    sudo apt-get update
-    sudo apt-get install build-essential
-    sudo apt-get install mysql-server mysql apache2 php5 php5-mysql php5-curl git
-    sudo apt-get install libssl-dev 
-
-    sudo /etc/init.d/apache2 restart
-
-    sudo service mysql restart
-    sudo /usr/bin/mysql_secure_installation
+# Setting up Apache and MySQL:
+	
+    service apache2 restart
+    service mysql restart
+    /usr/bin/mysql_secure_installation
 
 # Adding coinspark user:
 
-    sudo adduser coinspark
-    sudo usermod -a -G www-data coinspark
-    sudo usermod -a -G coinspark www-data
-    sudo chmod 775 /home/coinspark
+    adduser coinspark
+    usermod -a -G www-data coinspark
+    usermod -a -G coinspark www-data
+    chmod 775 /home/coinspark
     
 
 2.1.2 CentOS
 --------------------------------------------------
+
+# Ensure you are running as the root user:
 
     su
 
@@ -85,18 +119,19 @@ Requirements for the asset server are as follows:
     yum install wget
 
     cd /usr/src
-    wget http://www.openssl.org/source/openssl-1.0.1g.tar.gz
-    tar -zxf openssl-1.0.1g.tar.gz
-    cd openssl-1.0.1g
+    wget http://www.openssl.org/source/openssl-1.0.1k.tar.gz
+    tar -zxf openssl-1.0.1k.tar.gz
+    cd openssl-1.0.1k
     ./config --prefix=/usr --openssldir=/usr/local/openssl shared
     make
     make test
     make install
-    cd /usr/src
-    rm -rf openssl-1.0.1g.tar.gz
-    rm -rf openssl-1.0.1g
+    cd ..
+    rm -rf openssl-1.0.1k openssl-1.0.1k.tar.gz
 
-    service mysqld start	
+# Setting up Apache and MySQL:
+	
+    service mysqld start
     /usr/bin/mysql_secure_installation
     chkconfig mysqld on
 
@@ -113,7 +148,7 @@ Requirements for the asset server are as follows:
     chmod 775 /home/coinspark
 
 
-2.2 Installing message-server
+2.2 Installing the message server
 ==================================================
 
     su coinspark
@@ -133,7 +168,7 @@ Requirements for the asset server are as follows:
     mkdir .coinspark/messages/test/key
     mkdir .coinspark/messages/test/tmp
 
-    su root
+    su
 
 # for Ubuntu 12.04 and below:
 
@@ -149,31 +184,28 @@ Requirements for the asset server are as follows:
     ln -s ~coinspark/message-server/public/index.php /var/www/html/index.php 
 
 
-# for Ubuntu
-    service apache2 restart
-
-# for Centos
-    service httpd restart
-
-
-2.3 Configuring message-server
+2.3 Configuring the message server
 ==================================================
 
 # Coinspark message delivery server configuration file can be found at 
 
     ~coinspark/message-server/config/coinspark_config.php
 
+# To change the password used by PHP to access the database in MySQL, set the new
+  password for user 'coinspark_user' in MySQL using SET PASSWORD, then modify the
+  CONST_MYSQL_MESSAGE_DB_PASS constant in coinspark_config.php file accordingly.
+
+
+2.4 Test the message server is responding
+==================================================
+
+# Open your chosen URL in your web browser. You should see:
+
+    CoinSpark Message Delivery Server Status: OK
 
 
 3. CHANGELOG
 =====================================================================
 
-v1.0 beta 1 - 6 January 2015
+v1.0 beta 1 - 13 January 2015
 * First release
-
-
-
-
-
-
-
