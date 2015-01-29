@@ -285,6 +285,11 @@
             }   
         }
         
+        if(isset($message['ContentParts']))
+        {
+            ksort($message['ContentParts']);
+        }
+        
         if(!isset($message['Error']))
         {
             commit_transaction($db, $transaction);

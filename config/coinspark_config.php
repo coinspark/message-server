@@ -39,8 +39,8 @@
     define('COINSPARK_CREATE_MIMETYPE_ALLOWED', '');                            // if not empty, comma-delimited while list of mime types, all other mime types will be blocked
     define('COINSPARK_CREATE_FILENAME_MAX_BYTES', 128);                         // maximal size of the file name
     define('COINSPARK_CREATE_FILENAME_EXTENSION_BLOCK', '.exe,.com');           // comma-delimited list of disallowed filename extensions (not case sensitive)
-    define('COINSPARK_CREATE_MAX_PART_BYTES', 4096);                            // maximum number of bytes in one part,16777216
-    define('COINSPARK_CREATE_MAX_TOTAL_BYTES', 65535);                          // maximum total number of bytes allowed    ,16777216
+    define('COINSPARK_CREATE_MAX_PART_BYTES', 16777216);                        // maximum number of bytes in one part,16777216
+    define('COINSPARK_CREATE_MAX_TOTAL_BYTES', 16777216);                       // maximum total number of bytes allowed    ,16777216
     
     define('COINSPARK_RETRIEVE_RECIPIENT_UNLIMITED', "");                       // comma-delimited list of recipient addresses allowed without any limitations (if not in _BLOCKED). 
     define('COINSPARK_RETRIEVE_RECIPIENT_OTHER_ALLOWED', true);                 // if true - addresses not listed in _UNLIMITED are allowed
