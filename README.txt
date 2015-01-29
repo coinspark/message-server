@@ -103,7 +103,6 @@ Requirements for the asset server are as follows:
     usermod -a -G www-data coinspark
     usermod -a -G coinspark www-data
     chmod 775 /home/coinspark
-
     service apache2 restart
     
 
