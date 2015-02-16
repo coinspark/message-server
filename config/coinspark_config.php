@@ -28,7 +28,7 @@
 
     define('COINSPARK_CREATE_RECIPIENTS_MAX', 16);                              // maximum recipients per message
 
-    define('COINSPARK_CREATE_KEEPSECONDS_MAX', 86400);                          // maximum number of seconds message can be stored
+    define('COINSPARK_CREATE_KEEPSECONDS_MAX', 604800);                         // maximum number of seconds message can be stored
 
     define('COINSPARK_CREATE_SALT_MIN_BYTES', 8);                               // minimal size of the salt string (binary)
     define('COINSPARK_CREATE_SALT_MAX_BYTES', 48);                              // maximal size of the salt string (binary)
