@@ -100,6 +100,10 @@
             {
                 return $error;
             }            
+            if (($error = $this->acceptPubKey()) !== true)
+            {
+                return $error;
+            }
             if (($error = $this->acceptNonce('create')) !== true)
             {
                 return $error;
@@ -155,6 +159,10 @@
             {
                 return $error;
             }            
+            if (($error = $this->acceptPubKey()) !== true)
+            {
+                return $error;
+            }
             if (($error = $this->acceptNonce('retrieve')) !== true)
             {
                 return $error;
@@ -834,6 +842,30 @@
             return true;            
         }
         
+        private function acceptPubKey()
+        {
+            if(!isset($this->params['pubkey']))
+            {
+                return true;
+            }
+            if(!is_string(trim($this->params['pubkey'])))
+            {
+                log_string(log_level_filter,"","FILTER: pubkey - not string");
+                return array_to_object(array('code'=>COINSPARK_ERR_INVALID_PARAMS,'message'=>"The pubkey field is not a valid public key."));                
+            }
+                        
+            $pubkey=strtolower(trim($this->params['pubkey']));
+            if(preg_match("/[^a-f0-9]/", $pubkey))
+            {
+                log_string(log_level_filter,"","FILTER: txid - not hex: ".$pubkey);
+                return array_to_object(array('code'=>COINSPARK_ERR_PUBKEY_INCORRECT,'message'=>"The pubkey field is not a valid public key."));                                                
+            }
+            
+            $this->filtered['pubkey']=  hex_to_bin($pubkey);            
+            
+            return true;
+        }
+        
         private function acceptSignature($operation)        
         {
             if(!isset($this->params['signature']))
@@ -843,13 +875,16 @@
             }
                                     
             $address="";
+            $owner="";
             switch($operation)
             {
                 case 'create':
                     $address=$this->filtered['sender'];                    
+                    $owner='sender';
                     break;
                 case 'retrieve':
                     $address=$this->filtered['recipient'];                    
+                    $owner='recipient';
                     break;
                 default:
                     log_string(log_level_filter,"","FILTER: sigscript - wrong operation: ".$operation);
@@ -860,37 +895,43 @@
             if($sigscript === false)
             {
                 log_string(log_level_filter,"","FILTER: sigscript - not base64: ".bin_to_hex($sigscript));
-                return array_to_object(array('code'=>COINSPARK_ERR_INVALID_PARAMS,'message'=>"The signature field does not contain a base64-encoded bitcoin signature of the nonce by the owner of the sender address."));                                
+                return array_to_object(array('code'=>COINSPARK_ERR_INVALID_PARAMS,'message'=>"The signature field does not contain a base64-encoded bitcoin signature of the nonce by the owner of the $owner address."));                                
+            }
+            
+            $pubkey="";
+            if(isset($this->filtered['pubkey']))
+            {
+                $pubkey=$this->filtered['pubkey'];
             }
             
             if(!parse_script_sig($sigscript, $signature, $pubkey))
             {
                 log_string(log_level_filter,"","FILTER: sigscript - cannot parse: ".bin_to_hex($sigscript));
-                return array_to_object(array('code'=>COINSPARK_ERR_SIGNATURE_INCORRECT,'message'=>"The signature field does not contain a base64-encoded bitcoin signature of the nonce by the owner of the sender address."));                                
+                return array_to_object(array('code'=>COINSPARK_ERR_SIGNATURE_INCORRECT,'message'=>"The signature field does not contain a base64-encoded bitcoin signature of the nonce by the owner of the $owner address."));                                
             }
             
             if(!validate_public_key($pubkey))
             {
                 log_string(log_level_filter,"","FILTER: sigscript - invalid pubkey: ".bin_to_hex($sigscript));
-                return array_to_object(array('code'=>COINSPARK_ERR_SIGNATURE_INCORRECT,'message'=>"The signature field does not contain a base64-encoded bitcoin signature of the nonce by the owner of the sender address."));                                
+                return array_to_object(array('code'=>COINSPARK_ERR_PUBKEY_INCORRECT,'message'=>"The pubkey field is not a valid public key."));                                
             }
             
             if(!validate_signature($signature))
             {
                 log_string(log_level_filter,"","FILTER: sigscript - invalid signature: ".bin_to_hex($sigscript));
-                return array_to_object(array('code'=>COINSPARK_ERR_SIGNATURE_INCORRECT,'message'=>"The signature field does not contain a base64-encoded bitcoin signature of the nonce by the owner of the sender address."));                                
+                return array_to_object(array('code'=>COINSPARK_ERR_SIGNATURE_INCORRECT,'message'=>"The signature field does not contain a base64-encoded bitcoin signature of the nonce by the owner of the $owner address."));                                
             }
 
             if(!verify_address($address, $pubkey,$this->filtered['network']))
             {
                 log_string(log_level_reject,"","FILTER: sigscript - wrong address: ".bin_to_hex($sigscript).", address: ".$address);
-                return array_to_object(array('code'=>COINSPARK_ERR_SIGNATURE_INCORRECT,'message'=>"The signature field does not contain a base64-encoded bitcoin signature of the nonce by the owner of the sender address."));                                
+                return array_to_object(array('code'=>COINSPARK_ERR_PUBKEY_ADDRESS_MISMATCH,'message'=>"Public key doen't match the $owner address."));                                
             }
             
             if(!verify_signature($this->filtered['nonce'], $signature, $pubkey))
             {
                 log_string(log_level_reject,"","FILTER: sigscript - wrong signature: ".bin_to_hex($sigscript).", nonce: ".$this->filtered['nonce']);
-                return array_to_object(array('code'=>COINSPARK_ERR_SIGNATURE_INCORRECT,'message'=>"The signature field does not contain a base64-encoded bitcoin signature of the nonce by the owner of the sender address."));                                
+                return array_to_object(array('code'=>COINSPARK_ERR_SIGNATURE_INCORRECT,'message'=>"The signature field does not contain a base64-encoded bitcoin signature of the nonce by the owner of the $owner address."));                                
             }            
             
             return true;

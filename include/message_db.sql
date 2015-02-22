@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS contents(
     TxID                    VARCHAR(64) NOT NULL,
     Expired                 INT(11) NULL,
     ContentPartID           INT(11) NOT NULL,
-    Content                 BLOB NULL
+    Content                 LONGBLOB NULL
 ) engine =  InnoDB DEFAULT CHARSET=utf8;
 
 CREATE UNIQUE INDEX idx_cns_contentpartid      ON contents (TxID,ContentPartID) USING HASH;

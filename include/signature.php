@@ -1,5 +1,7 @@
 <?php
 
+    define("BITCOIN_SIGNED_MESSAGE_HEADER","Bitcoin Signed Message:\n");
+
     function base58_encode($data)
     {
         $alphabet = str_split("123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz");
@@ -140,6 +142,35 @@
         {
             return false;                                                       
         }
+
+        if(strlen($pubkey))
+        {
+            if(ord(substr($script_sig, 0,1)) == 0x30)
+            {
+                $signature=$script_sig;
+                return true;
+            }
+            
+            $len=32;
+            $signature=substr($script_sig,33,32);
+            if(ord(substr($signature,0,1)>=0x80))
+            {
+                $signature="\x00".$signature;
+                $len++;
+            }
+            $signature="\x02".chr($len).$signature;
+            
+            $len=32;
+            $signature=substr($script_sig,1,32).$signature;
+            if(ord(substr($signature,0,1)>=0x80))
+            {
+                $signature="\x00".$signature;
+                $len++;
+            }
+            $signature="\x02".chr($len).$signature;
+            $signature="\x30".chr(strlen($signature)).$signature;
+            return true;
+        }
         
         $signature_len=ord(substr($script_sig,0,1))-1;
         if($signature_len+2>strlen($script_sig))
@@ -228,41 +259,52 @@
     
     function verify_signature($message,$signature,$pubkey)
     {
-        $prefix=CONST_TMP_DIR."/".getmypid();
-        
-        $key_file=$prefix.'.key';
-        $sig_file=$prefix.'.sig';
-        $msg_file=$prefix.'.msg';
-
-        file_put_contents($key_file,pubkey_to_pem($pubkey));
-        file_put_contents($sig_file,$signature);
-        file_put_contents($msg_file,$message);
-
-        $command="openssl dgst -sha256 -verify $key_file -signature $sig_file < $msg_file";
-        $async_process=popen($command, 'r');
-		
-        $result="";
-        if (is_resource($async_process))
+        for($format=0;$format<2;$format++)
         {
-            $result.=fgets($async_process);
-            while (!feof($async_process)) 
+            $prefix=CONST_TMP_DIR."/".getmypid();
+
+            $key_file=$prefix.'.key';
+            $sig_file=$prefix.'.sig';
+            $msg_file=$prefix.'.msg';
+
+            file_put_contents($key_file,pubkey_to_pem($pubkey));
+            file_put_contents($sig_file,$signature);
+            file_put_contents($msg_file,$message);
+
+            $command="openssl dgst -sha256 -verify $key_file -signature $sig_file < $msg_file";
+            $async_process=popen($command, 'r');
+
+            $result="";
+            if (is_resource($async_process))
             {
-                $this_line=fgets($async_process);
-                if(strlen($this_line))
+                $result.=fgets($async_process);
+                while (!feof($async_process)) 
                 {
-                    $result.=$this_line;                        
+                    $this_line=fgets($async_process);
+                    if(strlen($this_line))
+                    {
+                        $result.=$this_line;                        
+                    }
                 }
+                fclose($async_process);
+            }        
+            unlink($key_file);
+            unlink($sig_file);
+            unlink($msg_file);
+
+
+            if(trim($result)=="Verified OK")
+            {
+                return true;
             }
-            fclose($async_process);
-        }        
-        unlink($key_file);
-        unlink($sig_file);
-        unlink($msg_file);
-        
-        
-        if(trim($result)=="Verified OK")
-        {
-            return true;
+            
+            if(strlen($message)>38)
+            {
+                return false;
+            }
+            
+            $message=chr(strlen(BITCOIN_SIGNED_MESSAGE_HEADER)).BITCOIN_SIGNED_MESSAGE_HEADER.chr(strlen($message)).$message;
+            $message=hash('sha256',$message,1);
         }
         return false;
     }

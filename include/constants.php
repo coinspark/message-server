@@ -51,4 +51,6 @@
     define("COINSPARK_ERR_NONCE_NOT_FOUND",                            -13000);
 
     define("COINSPARK_ERR_SIGNATURE_INCORRECT",                        -13010);
+    define("COINSPARK_ERR_PUBKEY_INCORRECT",                           -13011);
+    define("COINSPARK_ERR_PUBKEY_ADDRESS_MISMATCH",                    -13012);
 
