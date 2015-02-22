@@ -6,7 +6,9 @@
     require_once '../include/log.php'; 
     require_once '../include/signature.php'; 
     
-    define('CONST_TEST_SERVER_URL', '127.0.0.1');                       
+    
+//    define('CONST_TEST_SERVER_URL', '127.0.0.1');                       
+    define('CONST_TEST_SERVER_URL', 'msg1.coinspark.org');                       
     define('CONST_TEST_KEY_DIR', '/home/coinspark/.coinspark/messages/test/key');                          
     define('CONST_TEST_LOG_DIR', '/home/coinspark/.coinspark/messages/test/log');                          
     define('CONST_TEST_TMP_DIR', '/home/coinspark/.coinspark/messages/test/tmp');                          
@@ -20,7 +22,8 @@
     define("CONST_TEST_NOT_USED_PUBKEY","02c7cace7cbc7c62a0514572a0c2322eab863e5653f99f432f52cffe5fb2707f60");
     define("CONST_TEST_NOT_USED_ADDRESS","1Gf1UDw39Bk3jtLVkTH6FcHenP42b2iyba");
     
-    
+    define("CONST_BITCOIN_CLI_ACCOUNT","<bitcoin-account>");
+    define("CONST_BITCOIN_CLI_PATH","/path/to/bitcoin/cli");
     
     function output_string($message,$level=log_level_message)
     {
@@ -140,7 +143,13 @@
         
         unlink($msg_file);
 
-        return chr(strlen($signature)+1).$signature."\x00".chr(strlen($pubkey)).$pubkey;
+        return $signature;
+//        return chr(strlen($signature)+1).$signature."\x00".chr(strlen($pubkey)).$pubkey;
+    }
+
+    function get_bitcoin_cli_signature($message,$address)
+    {
+        return trim(run_command(CONST_BITCOIN_CLI_PATH." signmessage ".$address." ".  escapeshellarg($message)));         
     }
     
     function cleanup()
@@ -174,9 +183,23 @@
         
         $message['sender_key_id']=rand(0, CONST_TEST_MAX_KEYS-1);
 
+        $message['sender_bitcoin_cli']=false;
         $message['sender_pubkey']=get_pubkey($message['sender_key_id']);
         $message['sender_address']=get_address($message['sender_pubkey'],$message['network']);        
 
+        if(rand(0,1)==1)
+        {
+            $addresses=json_decode(run_command(CONST_BITCOIN_CLI_PATH." getaddressesbyaccount ".CONST_BITCOIN_CLI_ACCOUNT));
+            $addr=  $addresses[array_rand($addresses)];
+            $addr_info=json_decode(run_command(CONST_BITCOIN_CLI_PATH." validateaddress ".$addr));
+            $pubkey=$addr_info->pubkey;
+            
+            $message['network']='main';
+            $message['sender_bitcoin_cli']=true;
+            $message['sender_pubkey']=  hex_to_bin($pubkey);
+            $message['sender_address']=$addr;                    
+        }
+        
         $message['ispublic']=false;
         if(rand(0,9)==0)
         {
@@ -246,7 +269,7 @@
                 }
                 $filename.=$available_extensions[array_rand($available_extensions)];                
             }
-            $content_size=rand(1,min(COINSPARK_CREATE_MAX_PART_BYTES,COINSPARK_CREATE_MAX_TOTAL_BYTES-$message['num_content_parts']));
+            $content_size=rand(1,min(COINSPARK_CREATE_MAX_PART_BYTES/4096,COINSPARK_CREATE_MAX_TOTAL_BYTES/4096-$message['num_content_parts']));
             $str="";        
             for($i=0;$i<$content_size;$i++)
             {
@@ -452,7 +475,15 @@
         }
         $request->params->sender=$message['sender_address'];
         $request->params->nonce=$nonce;
-        $request->params->signature=  base64_encode(get_sigscript($nonce, $message['sender_key_id'], $message['sender_pubkey']));
+        if($message['sender_bitcoin_cli'])
+        {
+            $request->params->signature=  get_bitcoin_cli_signature($nonce, $message['sender_address']);
+        }
+        else
+        {
+            $request->params->signature=  base64_encode(get_sigscript($nonce, $message['sender_key_id'], $message['sender_pubkey']));
+        }
+        $request->params->pubkey= bin_to_hex($message['sender_pubkey']);
         $request->params->txid=$message['txid'];
         $request->params->ispublic=$message['ispublic'];
         if(!$message['ispublic'])
@@ -537,9 +568,11 @@
                     $request->params->signature.="$";
                     break;
                 case "signature not parseable":
-                    $request->params->signature=  base64_encode(base64_decode($request->params->signature)."A");
+                    $request->params->signature=  base64_encode("A".base64_decode($request->params->signature));
                     break;
                 case "signature invalid pubkey":
+                    $request->params->pubkey.="A";
+/*                    
                     $decoded=base64_decode($request->params->signature);
                     $signature_len=ord(substr($decoded,0,1))-1;
                     $pubkey_len=ord(substr($decoded,$signature_len+2,1));
@@ -549,8 +582,12 @@
                     $pubkey_len++;
                     $decoded=substr($decoded,0,$signature_len+2).chr($pubkey_len).$pubkey;
                     $request->params->signature=  base64_encode($decoded);
+ * 
+ */
                     break;
                 case "signature wrong address":
+                    $request->params->pubkey=CONST_TEST_NOT_USED_PUBKEY;
+/*                    
                     $decoded=base64_decode($request->params->signature);
                     $signature_len=ord(substr($decoded,0,1))-1;
                     $signature=substr($decoded,1,$signature_len);
@@ -558,6 +595,8 @@
                     $pubkey_len=strlen($pubkey);
                     $decoded=substr($decoded,0,$signature_len+2).chr($pubkey_len).$pubkey;
                     $request->params->signature=  base64_encode($decoded);
+ * 
+ */
                     break;
                 case "signature wrong signature":
                     $decoded=base64_decode($request->params->signature);
@@ -638,6 +677,7 @@
         $request->params->nonce=$nonce;
         $request->params->sizesonly=true;
         $request->params->signature=  base64_encode(get_sigscript($nonce, $recipient['id'], $recipient['pubkey']));
+        $request->params->pubkey= bin_to_hex($recipient['pubkey']);
         if(!is_null($error) && ($error['r'] == 'retrieve'))
         {
             switch($error['n'])
@@ -678,6 +718,7 @@
         $request->params->recipient=$recipient['address'];
         $request->params->nonce=$nonce;
         $request->params->signature=  base64_encode(get_sigscript($nonce, $recipient['id'], $recipient['pubkey']));
+        $request->params->pubkey= bin_to_hex($recipient['pubkey']);
         if(!is_null($error) && ($error['r'] == 'retrieve'))
         {
             switch($error['n'])
@@ -854,8 +895,8 @@
             array("t"=>"b","n"=>"signature not set"               ,"r"=>"create"      ,"c"=>COINSPARK_ERR_INVALID_PARAMS),
             array("t"=>"b","n"=>"signature not base64"            ,"r"=>"create"      ,"c"=>COINSPARK_ERR_INVALID_PARAMS),
             array("t"=>"b","n"=>"signature not parseable"         ,"r"=>"create"      ,"c"=>COINSPARK_ERR_SIGNATURE_INCORRECT),
-            array("t"=>"b","n"=>"signature invalid pubkey"        ,"r"=>"create"      ,"c"=>COINSPARK_ERR_SIGNATURE_INCORRECT),
-            array("t"=>"b","n"=>"signature wrong address"         ,"r"=>"create"      ,"c"=>COINSPARK_ERR_SIGNATURE_INCORRECT),
+            array("t"=>"b","n"=>"signature invalid pubkey"        ,"r"=>"create"      ,"c"=>COINSPARK_ERR_PUBKEY_INCORRECT),
+            array("t"=>"b","n"=>"signature wrong address"         ,"r"=>"create"      ,"c"=>COINSPARK_ERR_PUBKEY_ADDRESS_MISMATCH),
             array("t"=>"b","n"=>"signature wrong signature"       ,"r"=>"create"      ,"c"=>COINSPARK_ERR_SIGNATURE_INCORRECT),
 
             array("t"=>"b","n"=>"recipient not set"               ,"r"=>"pre_retrieve","c"=>COINSPARK_ERR_INVALID_PARAMS),
@@ -946,8 +987,7 @@
                 $start_time=  microtime(true);
                 $response=  query(CONST_TEST_SERVER_URL, $request);
                 output_string(sprintf("PC: %7.4f",  microtime(true)-$start_time));
-//              echo nl2br(htmlspecialchars(print_r($response,true)));
-
+        
                 if(property_exists($response, "error"))
                 {
                     if(($error_def['r'] !='pre_create') || ($error_def['c'] != $response->error->code))
