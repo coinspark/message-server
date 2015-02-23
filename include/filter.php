@@ -180,6 +180,7 @@
             $this->filtered['network']=COINSPARK_CREATE_DEFAULT_NETWORK;
             
             $not_supported_error_code=COINSPARK_ERR_SENDER_NETWORK_NOT_ACCEPTABLE;
+            
             if($operation=='retrieve')
             {
                 $not_supported_error_code=COINSPARK_ERR_RECIPIENT_NETWORK_NOT_ACCEPTABLE;
@@ -187,7 +188,7 @@
             
             if(isset($this->params['testnet']) && $this->params['testnet'])
             {
-                if(in_array("testnet", explode(',',COINSPARK_CREATE_NETWORK_ALLOW)))
+                if(($operation=='create') || in_array("testnet", explode(',',COINSPARK_CREATE_NETWORK_ALLOW)))
                 {
                     $this->filtered['network']="testnet";
                 }
@@ -218,7 +219,7 @@
             if(in_array($ip, explode(',',COINSPARK_CREATE_IP_BLOCKED)))
             {
                 log_string(log_level_reject,"","FILTER: sender ip - blocked: ".$ip);
-                return array_to_object(array('code'=>COINSPARK_ERR_SENDER_IP_NOT_ACCEPTED,'message'=>"The sender ip will never be accepted, e.g. if this server only allows messages from certain senders."));                
+                return array_to_object(array('code'=>COINSPARK_ERR_SENDER_NOT_ACCEPTED,'message'=>"The sender ip will never be accepted, e.g. if this server only allows messages from certain senders."));                
             }
 
             $ip_info=db_get_address_usage($this->db, $ip,'create');
@@ -231,7 +232,7 @@
             if(isset($ip_info['Blocked']) && $ip_info['Blocked'])                    
             {
                 log_string(log_level_reject,"","FILTER: sender ip - suspended: ".$ip);
-                return array_to_object(array('code'=>COINSPARK_ERR_SENDER_IP_IS_SUSPENDED,'message'=>"The sender IP is suspended permanently."));                                    
+                return array_to_object(array('code'=>COINSPARK_ERR_SENDER_IS_SUSPENDED,'message'=>"The sender IP is suspended permanently."));                                    
             }
             if(!in_array($ip, explode(',',COINSPARK_CREATE_IP_UNLIMITED)))
             {
@@ -242,14 +243,14 @@
                         if($ip_info['DailyCount']>=COINSPARK_CREATE_IP_OTHER_DAILY_MAX)
                         {
                             log_string(log_level_reject,"","FILTER: sender ip - usage rate: ".$ip);
-                            return array_to_object(array('code'=>COINSPARK_ERR_SENDER_IP_IS_SUSPENDED,'message'=>"The sender IP has been temporarily suspended, e.g. if they have already sent too many messages via this server."));                        
+                            return array_to_object(array('code'=>COINSPARK_ERR_SENDER_IS_SUSPENDED,'message'=>"The sender IP has been temporarily suspended, e.g. if they have already sent too many messages via this server."));                        
                         }
                     }                    
                 }
                 else
                 {
                     log_string(log_level_reject,"","FILTER: sender ip - not allowed: ".$ip);
-                    return array_to_object(array('code'=>COINSPARK_ERR_SENDER_IP_NOT_ACCEPTED,'message'=>"The sender ip will never be accepted, e.g. if this server only allows messages from certain senders."));                                                    
+                    return array_to_object(array('code'=>COINSPARK_ERR_SENDER_NOT_ACCEPTED,'message'=>"The sender ip will never be accepted, e.g. if this server only allows messages from certain senders."));                                                    
                 }
             }            
             
@@ -267,13 +268,13 @@
                 return true;
             }
             
-            
+/*            
             if(in_array($ip, explode(',',COINSPARK_RETRIEVE_IP_BLOCKED)))
             {
                 log_string(log_level_reject,"","FILTER: recipient ip - blocked: ".$ip);
-                return array_to_object(array('code'=>COINSPARK_ERR_RECIPIENT_IP_NOT_ACCEPTED,'message'=>"The recipient ip will never be accepted, e.g. if this server only allows messages from certain recipients."));                
+                return array_to_object(array('code'=>COINSPARK_ERR_RECIPIENT_NOT_ACCEPTED,'message'=>"The recipient ip will never be accepted, e.g. if this server only allows messages from certain recipients."));                
             }
-
+*/
             $ip_info=db_get_address_usage($this->db, $ip,'retrieve');
             
             if(!is_array($ip_info))
@@ -284,11 +285,20 @@
             if(isset($ip_info['Blocked']) && $ip_info['Blocked'])                    
             {
                 log_string(log_level_reject,"","FILTER: recipient ip - suspended: ".$ip);
-                return array_to_object(array('code'=>COINSPARK_ERR_RECIPIENT_IP_IS_SUSPENDED,'message'=>"The recipient IP is suspended permanently."));                                    
+                return array_to_object(array('code'=>COINSPARK_ERR_RECIPIENT_IS_SUSPENDED,'message'=>"The recipient IP is suspended permanently."));                                    
             }
             
             if(!in_array($ip, explode(',',COINSPARK_RETRIEVE_IP_UNLIMITED)))
             {
+                if(isset($ip_info['DailyCount']))
+                {
+                    if($ip_info['DailyCount']>=COINSPARK_RETRIEVE_IP_OTHER_DAILY_MAX)
+                    {
+                        log_string(log_level_reject,"","FILTER: recipient ip - usage rate: ".$ip);
+                        return array_to_object(array('code'=>COINSPARK_ERR_RECIPIENT_IS_SUSPENDED,'message'=>"The recipient IP has been temporarily suspended, e.g. if they have already retrieved too many messages via this server."));                        
+                    }
+                }                    
+/*                
                 if(COINSPARK_RETRIEVE_IP_OTHER_ALLOWED)
                 {
                     if(isset($ip_info['DailyCount']))
@@ -296,15 +306,17 @@
                         if($ip_info['DailyCount']>=COINSPARK_RETRIEVE_IP_OTHER_DAILY_MAX)
                         {
                             log_string(log_level_reject,"","FILTER: recipient ip - usage rate: ".$ip);
-                            return array_to_object(array('code'=>COINSPARK_ERR_RECIPIENT_IP_IS_SUSPENDED,'message'=>"The recipient IP has been temporarily suspended, e.g. if they have already retrieved too many messages via this server."));                        
+                            return array_to_object(array('code'=>COINSPARK_ERR_RECIPIENT_IS_SUSPENDED,'message'=>"The recipient IP has been temporarily suspended, e.g. if they have already retrieved too many messages via this server."));                        
                         }
                     }                    
                 }
                 else
                 {
                     log_string(log_level_reject,"","FILTER: recipient ip - not allowed: ".$ip);
-                    return array_to_object(array('code'=>COINSPARK_ERR_RECIPIENT_IP_NOT_ACCEPTED,'message'=>"The recipient ip will never be accepted, e.g. if this server only allows messages from certain recipients."));                                    
+                    return array_to_object(array('code'=>COINSPARK_ERR_RECIPIENT_NOT_ACCEPTED,'message'=>"The recipient ip will never be accepted, e.g. if this server only allows messages from certain recipients."));                                    
                 }
+ * 
+ */
             }            
             
             
