@@ -8,7 +8,7 @@
     
     
 //    define('CONST_TEST_SERVER_URL', '127.0.0.1');                       
-    define('CONST_TEST_SERVER_URL', 'msg1.coinspark.org');                       
+    define('CONST_TEST_SERVER_URL', 'msg3.coinspark.org');                       
     define('CONST_TEST_KEY_DIR', '/home/coinspark/.coinspark/messages/test/key');                          
     define('CONST_TEST_LOG_DIR', '/home/coinspark/.coinspark/messages/test/log');                          
     define('CONST_TEST_TMP_DIR', '/home/coinspark/.coinspark/messages/test/tmp');                          
@@ -674,10 +674,13 @@
         }
         $request->params->txid=$message['txid'];
         $request->params->recipient=$recipient['address'];
-        $request->params->nonce=$nonce;
         $request->params->sizesonly=true;
-        $request->params->signature=  base64_encode(get_sigscript($nonce, $recipient['id'], $recipient['pubkey']));
-        $request->params->pubkey= bin_to_hex($recipient['pubkey']);
+        if(!$message['ispublic'])        
+        {
+            $request->params->nonce=$nonce;
+            $request->params->signature=  base64_encode(get_sigscript($nonce, $recipient['id'], $recipient['pubkey']));
+            $request->params->pubkey= bin_to_hex($recipient['pubkey']);
+        }
         if(!is_null($error) && ($error['r'] == 'retrieve'))
         {
             switch($error['n'])
@@ -716,9 +719,12 @@
         }
         $request->params->txid=$message['txid'];
         $request->params->recipient=$recipient['address'];
-        $request->params->nonce=$nonce;
-        $request->params->signature=  base64_encode(get_sigscript($nonce, $recipient['id'], $recipient['pubkey']));
-        $request->params->pubkey= bin_to_hex($recipient['pubkey']);
+        if(!$message['ispublic'])
+        {
+            $request->params->nonce=$nonce;
+            $request->params->signature=  base64_encode(get_sigscript($nonce, $recipient['id'], $recipient['pubkey']));
+            $request->params->pubkey= bin_to_hex($recipient['pubkey']);
+        }
         if(!is_null($error) && ($error['r'] == 'retrieve'))
         {
             switch($error['n'])

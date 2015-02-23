@@ -132,7 +132,7 @@
                     break;
                 case CS_ERR_DB_NOT_ALLOWED:
                     log_string(log_level_reject,"","REJECT: txid recipient not allowed: ".$params['txid'].", address: ".$params['recipient']);
-                    $error=array_to_object(array('code'=>COINSPARK_ERR_RECIPIENT_IP_NOT_ACCEPTED,'message'=>"The provided recipient is not one of the permitted addresses for retrieving this message."));
+                    $error=array_to_object(array('code'=>COINSPARK_ERR_RECIPIENT_NOT_ACCEPTED,'message'=>"The provided recipient is not one of the permitted addresses for retrieving this message."));
                     break;
                 case CS_ERR_DB_CORRUPTED:
                     $error=array_to_object(array('code'=>COINSPARK_ERR_INTERNAL_ERROR,'message'=>"Something went wrong internally"));

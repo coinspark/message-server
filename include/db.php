@@ -140,6 +140,41 @@
         return commit_transaction($db, $transaction);
     }
     
+    function db_get_message_public_flag(&$db, $txid)
+    {
+        if($db == null)
+        {
+            $db=open_message_db();
+        }
+        if($db == null)
+        {
+            return false;
+        }
+        
+        $result=run_sql($db,"SELECT * FROM transactions WHERE TxID='".$txid."'");
+        
+        if($result === false)
+        {
+            return false;
+        }
+        
+        $row_array=$result->fetch_assoc();
+        if(is_array($row_array))
+        {            
+            $row_array=array_change_key_case($row_array);
+            if($row_array[strtolower('PublicFlags')]==0)
+            {
+                return false;
+            }
+        }   
+        else
+        {
+            return array_to_object(array('code'=>COINSPARK_ERR_TX_MESSAGE_UNKNOWN,'message'=>"This server does not have any message for transaction txid."));            
+        }
+        
+        return true;
+    }
+    
     function db_get_message(&$db, $txid,$test_only=false,$address="",$sizes_only=false)
     {
         if($db == null)

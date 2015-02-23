@@ -155,22 +155,31 @@
             {
                 return $error;
             }
-            if (($error = $this->acceptTxID()) !== true)
+            if (($error = $this->acceptTxID('retrieve')) !== true)
             {
                 return $error;
             }            
-            if (($error = $this->acceptPubKey()) !== true)
-            {
-                return $error;
-            }
+                        
             if (($error = $this->acceptNonce('retrieve')) !== true)
             {
-                return $error;
+                if(!$this->filtered['public'])
+                {
+                    return $error;
+                }
             }
-            if (($error = $this->acceptSignature('retrieve')) !== true)
+            
+            if(!$this->filtered['public'])
             {
-                return $error;
+                if (($error = $this->acceptPubKey()) !== true)
+                {
+                    return $error;
+                }
+                if (($error = $this->acceptSignature('retrieve')) !== true)
+                {
+                    return $error;
+                }
             }
+            
             return true;
         }
         
@@ -180,11 +189,6 @@
             $this->filtered['network']=COINSPARK_CREATE_DEFAULT_NETWORK;
             
             $not_supported_error_code=COINSPARK_ERR_SENDER_NETWORK_NOT_ACCEPTABLE;
-            
-            if($operation=='retrieve')
-            {
-                $not_supported_error_code=COINSPARK_ERR_RECIPIENT_NETWORK_NOT_ACCEPTABLE;
-            }
             
             if(isset($this->params['testnet']) && $this->params['testnet'])
             {
@@ -811,7 +815,7 @@
             return true;
         }
         
-        private function acceptTxID()                        
+        private function acceptTxID($operation='create')                        
         {
             if(!isset($this->params['txid']))
             {
@@ -839,6 +843,16 @@
             }
             
             $this->filtered['txid']=$txid;            
+            
+            if($operation == 'retrieve')
+            {
+                $this->filtered['public'] = db_get_message_public_flag($db, $txid);
+
+                if(is_array($this->filtered['public']))
+                {
+                    return $this->filtered['public'];
+                }
+            }
             return true;
         }
 
